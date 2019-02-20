@@ -29,7 +29,7 @@ const Form = styled.form`
     color: #1c1c1c;
   }
   .inner-container {
-    padding: 40px 0;
+    padding: 20px 0;
   }
   .two-half {
     display: grid;
