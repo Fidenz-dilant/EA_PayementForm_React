@@ -20,7 +20,8 @@ class Payment extends Component {
             displayErrors: '',
             isCardValid: true,
             isDateValid: true,
-            isCVVValid: true
+            isCVVValid: true,
+            loading: false,
         };
 
         this.handleDatePicker = this.handleDatePicker.bind(this);
@@ -49,6 +50,10 @@ class Payment extends Component {
         e.preventDefault();
         const { cardnumber, cardname, cvv, expdate } = this.state;
 
+        this.setState({
+            loading: true
+        });
+
         window.Stripe.setPublishableKey(stripePublicKey);
 
         const dateParts = expdate.split("/");
@@ -57,7 +62,10 @@ class Payment extends Component {
 
         const isValid = this.checkValidation(cardnumber, cvv, month, year);
 
-        console.log(isValid);
+        if (isValid) {
+
+        }
+
         // const isCardValid = Stripe.card.validateCardNumber(cardnum);
         // const isDateValid = Stripe.card.validateExpiry(month, year);
         // const isCVVValid = Stripe.card.validateCVC(cvv);
@@ -72,6 +80,7 @@ class Payment extends Component {
 
         if ( !isCVVValid || !isDateValid || !isCardValid ) {
             this.setState({
+                loading: false,
                 displayErrors: true,
                 isCardValid: isCardValid,
                 isDateValid: isDateValid,
@@ -95,7 +104,7 @@ class Payment extends Component {
             <PaymentContainer>
                 <Form onSubmit={this.handleSubmit}>
                     <h2>Billing Info</h2>
-                    <fieldset>
+                    <fieldset aria-busy={this.state.loading} disabled={this.state.loading}>
                         { this.state.displayErrors && <DisplayError>
                             <div className="inner">
                                 {!this.state.isCardValid && <h3>Please enter valid cardname</h3>}
