@@ -19,4 +19,23 @@ const DisplayError = styled.div`
   }
 `;
 
-export default DisplayError;
+const DisplaySuccess = styled.div`
+  
+  margin: 16px 0;
+  
+  .inner {
+    background-color: #dff0d8;
+    padding: 16px;
+    border-radius: 4px;
+    border-left: 5px solid #3c763d;
+    color: #3c763d;
+    
+    h3 {
+      font-family: 'Nunito', sans-serif;
+      font-size: 16px;
+      text-align: left;
+    }
+  }
+`;
+
+export  {DisplayError, DisplaySuccess};

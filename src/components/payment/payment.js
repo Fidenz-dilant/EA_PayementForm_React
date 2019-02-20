@@ -1,11 +1,12 @@
 import React, {Component} from 'react';
 import NumberFormat from 'react-number-format';
 import Datetime from 'react-datetime';
+import creditCardType from 'credit-card-type';
 import Form from '../../styles/Form';
 import PaymentContainer from './payement-styles';
 import '../../assets/date-picker.css';
 import { stripePublicKey } from "../../config";
-import DisplayError from '../../styles/DisplayError';
+import {DisplayError,DisplaySuccess} from '../../styles/DisplayNotification';
 
 class Payment extends Component {
 
@@ -17,7 +18,9 @@ class Payment extends Component {
             cardname: '',
             cardnumber: '',
             cvv: '',
+            cardType: '',
             displayErrors: '',
+            displaySuccess: '',
             isCardValid: true,
             isDateValid: true,
             isCVVValid: true,
@@ -34,9 +37,20 @@ class Payment extends Component {
     };
 
     handleCreditCardChange = e => {
+        const cardType = this.checkCardType(e.value);
        this.setState({
-           cardnumber: e.value
-       })
+           cardnumber: e.value,
+           cardType: cardType
+       });
+    };
+
+    checkCardType = cardnumber => {
+        const cardType = creditCardType(cardnumber);
+        if ( cardnumber !== '' && cardType.length > 0  ) {
+            return cardType[0].niceType;
+        } else {
+            return false;
+        }
     };
 
     handleChange = e => {
@@ -46,12 +60,14 @@ class Payment extends Component {
         });
     };
 
-    handleSubmit = e => {
+    handleSubmit = async e => {
         e.preventDefault();
         const { cardnumber, cardname, cvv, expdate } = this.state;
 
         this.setState({
-            loading: true
+            loading: true,
+            displayErrors: '',
+            displaySuccess: '',
         });
 
         window.Stripe.setPublishableKey(stripePublicKey);
@@ -62,13 +78,29 @@ class Payment extends Component {
 
         const isValid = this.checkValidation(cardnumber, cvv, month, year);
 
+        const that = this;
+
         if (isValid) {
-
+            window.Stripe.card.createToken({
+                number: cardnumber,
+                name: cardname,
+                cvc: cvv,
+                exp_month: month,
+                exp_year: year
+            }, function (status, response) {
+                if(response.error) {
+                    that.setState({
+                        loading: false,
+                        displayErrors: response.error.message
+                    });
+                } else {
+                    that.setState({
+                        loading: false,
+                        displaySuccess: "payment success"
+                    });
+                }
+            });
         }
-
-        // const isCardValid = Stripe.card.validateCardNumber(cardnum);
-        // const isDateValid = Stripe.card.validateExpiry(month, year);
-        // const isCVVValid = Stripe.card.validateCVC(cvv);
     };
 
 
@@ -112,6 +144,11 @@ class Payment extends Component {
                                 {!this.state.isCVVValid && <h3>Please enter valid CVV</h3>}
                             </div>
                         </DisplayError>}
+                        { this.state.displaySuccess && <DisplaySuccess>
+                            <div className="inner">
+                                {this.state.displaySuccess}
+                            </div>
+                        </DisplaySuccess>}
                         <div className="inner-container">
                             <label htmlFor="Cardnumber">
                                 <NumberFormat
@@ -123,6 +160,7 @@ class Payment extends Component {
                                     isNumericString={true}
                                     onValueChange={this.handleCreditCardChange}
                                 />
+                                { this.state.cardType && <span className="card-type">{this.state.cardType}</span> }
                             </label>
                             <label htmlFor="Cardname">
                                 <input

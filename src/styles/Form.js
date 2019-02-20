@@ -23,6 +23,7 @@ const Form = styled.form`
   label {
     display: block;
     margin-bottom: 1rem;
+    position: relative;
   }
   h2 {
     font-family: 'Nunito', sans-serif;
@@ -83,6 +84,13 @@ const Form = styled.form`
 	&:focus {
 	  outline: none;
 	}
+  }
+  
+  .card-type {
+    font-family: 'Nunito',sans-serif;
+    position: absolute;
+    top: 44px;
+    right: 0px;
   }
   
   input[type=number]::-webkit-inner-spin-button, 
